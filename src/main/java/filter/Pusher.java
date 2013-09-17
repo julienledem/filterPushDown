@@ -70,24 +70,28 @@ public class Pusher {
             }
           }
         }
-        List<Expression> newAndList = new ArrayList<>();
-        for (Expression or : andList) {
-          List<Expression> orList = or.toOrList();
-          List<Expression> newOrList = new ArrayList<>();
-          for (Expression e : orList) {
-            if (!e.toString().equals(maxExpression.toString())) {
-              newOrList.add(e);
+        if (max > 1) {
+          List<Expression> newAndList = new ArrayList<>();
+          for (Expression or : andList) {
+            List<Expression> orList = or.toOrList();
+            List<Expression> newOrList = new ArrayList<>();
+            for (Expression e : orList) {
+              if (!e.equals(maxExpression)) {
+                newOrList.add(e);
+              }
+            }
+            if (newOrList.size() > 0) {
+              newAndList.add(toOr(newOrList));
             }
           }
-          if (newOrList.size() > 0) {
-            newAndList.add(toOr(newOrList));
+          if (newAndList.size() < 2) {
+            // there was nothing left to factorize
+            return toAnd(andList);
           }
-        }
-        if (newAndList.size() < 2) {
-          // there was nothing left to factorize
+          return new BinaryExpression(OR, maxExpression, factorize(newAndList));
+        } else {
           return toAnd(andList);
         }
-        return new BinaryExpression(OR, maxExpression, factorize(newAndList));
       }
 
       @Override
